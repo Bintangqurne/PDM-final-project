@@ -1,0 +1,34 @@
+[
+          {
+        "id": 1,
+        "name": "Nasi Goreng",
+        "description": "Nasi goreng dengan bumbu spesial dan tambahan telur.",
+        "price": 20000,
+        "image": "https://example.com/images/nasi-goreng.jpg",
+        "productId": 2
+      },
+      {
+        "id": 2,
+        "name": "Mie Ayam",
+        "description": "Mie kenyal dengan topping ayam lezat.",
+        "price": 15000,
+        "image": "https://example.com/images/mie-ayam.jpg",
+        "productId": 1
+      },
+      {
+        "id": 3,
+        "name": "Es Teh Manis",
+        "description": "Teh manis segar dengan es batu.",
+        "price": 5000,
+        "image": "https://example.com/images/es-teh-manis.jpg",
+        "productId": 3
+      },
+      {
+        "id": 4,
+        "name": "Jus Jeruk",
+        "description": "Jus jeruk segar tanpa pengawet.",
+        "price": 10000,
+        "image": "https://example.com/images/jus-jeruk.jpg",
+        "productId": 4
+      }
+    ]  
