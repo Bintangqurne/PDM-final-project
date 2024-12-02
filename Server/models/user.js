@@ -11,18 +11,32 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
+      User.hasMany(models.History, {foreignKey: 'userId'})
+      User.hasMany(models.Order, {foreignKey: 'userId'})
     }
   }
   User.init({
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        notNull : {msg: 'email tidak boleh kosong'},
+        notEmpty : {msg: 'email tidak boleh kosong'},
+        isEmail : {msg: 'isi harus email'}
+      }
+    },
     username: {
       type: DataTypes.STRING,
       allowNull: true
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
       validate: {
-        len: [5, 30]
+        notNull : {msg: 'password tidak boleh kosong'},
+        notEmpty : {msg: 'password tidak boleh kosong'},
+        len : [5, Infinity]
       }
     },
     role: {

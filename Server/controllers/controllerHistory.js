@@ -46,6 +46,27 @@ class controllerHistory{
             console.log(error);    
         }
     }
+
+    static async deleteHistory(req, res, next){
+        try {
+            const id = req.params.id;
+            let deleted = await History.destroy({
+                where : {
+                    id
+                }
+            })
+
+            if (deleted !== 0) {
+                req.json({
+                    message : `History Pemesanan with ${id} deleted successfully`
+                })
+            } else {
+                throw {name: "error not found"}
+            }
+        } catch (error) {
+            console.log(error);   
+        }
+    }
 }
 
 module.exports = controllerHistory

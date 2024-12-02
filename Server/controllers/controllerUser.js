@@ -5,9 +5,10 @@ const {User} = require("../models")
 class controllerUser{
     static async register(req, res, next) {
         try {
-          const { username, password, role} = req.body;
+          const { email, username, password, role} = req.body;
     
           const newUser = await User.create({
+            email,
             username,
             password,
             role,
@@ -64,3 +65,5 @@ class controllerUser{
       }
     
 }
+
+module.exports = controllerUser

@@ -34,6 +34,40 @@
         "amount": 20,
         "image": "https://example.com/images/jus-jeruk.jpg",
         "categoryId": 2
+      },
+      {
+        "id": 5,
+        "name": "Paket 1 (nasi soto betawi + minum)",
+        "description": "Rasakan paket hemat",
+        "price": 20000,
+        "amount": 20,
+        "image": "https://example.com/images/jus-jeruk.jpg",
+        "categoryId": 3
+      },
+      {
+        "id": 6,
+        "name": "Paket 2 (nasi ayam goreng + sayur asem)",
+        "description": "Rasakan paket hemat makanan",
+        "price": 21000,
+        "amount": 20,
+        "image": "https://example.com/images/jus-jeruk.jpg",
+        "categoryId": 3
+      },
+      {
+        "id": 7,
+        "name": "sayur asem",
+        "description": "Sayur Asam yang enak",
+        "price": 10000,
+        "image": "https://example.com/images/jus-jeruk.jpg",
+        "categoryId": 1
+      },
+      {
+        "id": 8,
+        "name": "soto betawi",
+        "description": "Soto Betawi yang sangat nyaman",
+        "price": 20000,
+        "image": "https://example.com/images/jus-jeruk.jpg",
+        "categoryId": 1
       }
     ]
   

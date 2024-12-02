@@ -10,7 +10,9 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      History.belongsTo(models.Product, {foreignKey: 'productId'})
+      History.belongsTo(models.User, {foreignKey: 'userId'})
+      History.belongsTo(models.Table, {foreignKey: 'tableId'})
     }
   }
   History.init({
@@ -54,6 +56,20 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty : {msg : 'Id Product tidak boleh kosong'}
       }
     },
+    userId: {
+      type: DataTypes.INTEGER
+    },
+    orderType: {
+      type: DataTypes.STRING,
+    },
+    tableId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notNull: {msg: "Table Id tidak boleh kosong"},
+        notEmpty: {msg: "Table Id tidak boleh kosong"},
+      }
+    }
   }, {
     sequelize,
     modelName: 'History',

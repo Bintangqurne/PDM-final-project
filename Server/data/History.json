@@ -1,34 +1,82 @@
 [
-          {
-        "id": 1,
-        "name": "Nasi Goreng",
-        "description": "Nasi goreng dengan bumbu spesial dan tambahan telur.",
-        "price": 20000,
-        "image": "https://example.com/images/nasi-goreng.jpg",
-        "productId": 2
-      },
-      {
-        "id": 2,
-        "name": "Mie Ayam",
-        "description": "Mie kenyal dengan topping ayam lezat.",
-        "price": 15000,
-        "image": "https://example.com/images/mie-ayam.jpg",
-        "productId": 1
-      },
-      {
-        "id": 3,
-        "name": "Es Teh Manis",
-        "description": "Teh manis segar dengan es batu.",
-        "price": 5000,
-        "image": "https://example.com/images/es-teh-manis.jpg",
-        "productId": 3
-      },
-      {
-        "id": 4,
-        "name": "Jus Jeruk",
-        "description": "Jus jeruk segar tanpa pengawet.",
-        "price": 10000,
-        "image": "https://example.com/images/jus-jeruk.jpg",
-        "productId": 4
-      }
-    ]  
+  {
+    "name": "Nasi Goreng",
+    "price": 20000,
+    "description": "Nasi goreng dengan bumbu spesial dan tambahan telur.",
+    "image": "https://example.com/images/nasi-goreng.jpg",
+    "productId": 1,
+    "userId": null,
+    "orderType": "dine in",
+    "tableId": 1
+  },
+  {
+    "name": "Mie Ayam",
+    "price": 15000,
+    "description": "Mie kenyal dengan topping ayam lezat.",
+    "image": "https://example.com/images/mie-ayam.jpg",
+    "productId": 2,
+    "userId": null,
+    "orderType": "pick up",
+    "tableId": 2
+  },
+  {
+    "name": "Es Teh Manis",
+    "price": 5000,
+    "description": "Teh manis segar dengan es batu.",
+    "image": "https://example.com/images/es-teh-manis.jpg",
+    "productId": 3,
+    "userId": null,
+    "orderType": "dine in",
+    "tableId": 3
+  },
+  {
+    "name": "Jus Jeruk",
+    "price": 10000,
+    "description": "Jus jeruk segar tanpa pengawet.",
+    "image": "https://example.com/images/jus-jeruk.jpg",
+    "productId": 4,
+    "userId": null,
+    "orderType": "pick up",
+    "tableId": 4
+  },
+  {
+    "name": "Paket 1 (nasi soto betawi + minum)",
+    "price": 20000,
+    "description": "Rasakan paket hemat",
+    "image": "https://example.com/images/jus-jeruk.jpg",
+    "productId": 5,
+    "userId": null,
+    "orderType": "dine in",
+    "tableId": 5
+  },
+  {
+    "name": "Paket 2 (nasi ayam goreng + sayur asem)",
+    "price": 21000,
+    "description": "Rasakan paket hemat makanan",
+    "image": "https://example.com/images/jus-jeruk.jpg",
+    "productId": 6,
+    "userId": null,
+    "orderType": "pick up",
+    "tableId": 6
+  },
+  {
+    "name": "Sayur Asem",
+    "price": 10000,
+    "description": "Sayur Asam yang enak",
+    "image": "https://example.com/images/jus-jeruk.jpg",
+    "productId": 7,
+    "userId": null,
+    "orderType": "dine in",
+    "tableId": 7
+  },
+  {
+    "name": "Soto Betawi",
+    "price": 20000,
+    "description": "Soto Betawi yang sangat nyaman",
+    "image": "https://example.com/images/jus-jeruk.jpg",
+    "productId": 8,
+    "userId": null,
+    "orderType": "pick up",
+    "tableId": 8
+  }
+]

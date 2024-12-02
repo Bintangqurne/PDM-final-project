@@ -1,0 +1,51 @@
+[
+    {
+      "userId": null,
+      "totalPrice": 20000,
+      "orderType": "dine in",
+      "tableId": 1
+    },
+    {
+      "userId": null,
+      "totalPrice": 15000,
+      "orderType": "pick up",
+      "tableId": 2
+    },
+    {
+      "userId": null,
+      "totalPrice": 5000,
+      "orderType": "dine in",
+      "tableId": 3
+    },
+    {
+      "userId": null,
+      "totalPrice": 10000,
+      "orderType": "pick up",
+      "tableId": 4
+    },
+    {
+      "userId": null,
+      "totalPrice": 20000,
+      "orderType": "dine in",
+      "tableId": 5
+    },
+    {
+      "userId": null,
+      "totalPrice": 21000,
+      "orderType": "pick up",
+      "tableId": 6
+    },
+    {
+      "userId": null,
+      "totalPrice": 10000,
+      "orderType": "dine in",
+      "tableId": 7
+    },
+    {
+      "userId": null,
+      "totalPrice": 20000,
+      "orderType": "pick up",
+      "tableId": 8
+    }
+  ]
+  
