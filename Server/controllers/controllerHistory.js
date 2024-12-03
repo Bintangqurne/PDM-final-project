@@ -1,35 +1,170 @@
-const {Product, History} = require("../models")
+const {Product, History, Order, Table} = require("../models")
+const { sequelize } = require('../models'); // Pastikan sequelize di-import jika tidak otomatis tersedia
+class ControllerHistoryCustomer{
 
-class controllerHistory{
-    static async historyProduct(req, res, next){
+    static async historyProduct(req, res, next) {
+        const t = await sequelize.transaction(); // Mulai transaksi
         try {
-            const {productId} = req.params;
-            let {name, description, price, image} = req.body;
+            const { productId } = req.params;
+            const userId = req.user?.id || null;
+            let { name, description, price, image, tableId, orderType, quantity } = req.body;
+    
+            // Validasi orderType dan tableId
+            if (orderType === 'dine in' && (!tableId || isNaN(tableId))) {
+                throw { name: 'TableRequired', message: 'TableId wajib diisi untuk dine in.' };
+            }
+            if (orderType === 'pick up') {
+                tableId = null; // Set tableId ke null untuk pick up
+            }
+    
+            // Cek apakah meja tersedia hanya untuk dine in
+            if (orderType === 'dine in') {
+                const table = await Table.findByPk(tableId, { transaction: t });
+                if (!table || !table.isAvailable) {
+                    throw { name: 'TableNotAvailable', message: 'Meja tidak tersedia untuk dipesan.' };
+                }
+            }
+    
+            // Cek produk dan stok
+            const product = await Product.findByPk(productId, { transaction: t });
+            if (!product) {
+                throw { name: 'ProductNotFound', message: 'Produk tidak ditemukan.' };
+            }
+            if (product.amount <= 0 || quantity > product.amount) {
+                throw { name: 'InsufficientStock', message: 'Jumlah produk tidak mencukupi.' };
+            }
+    
+            // Kurangi stok produk
+            product.amount -= quantity;
+            await product.save({ transaction: t });
+    
+            // Hitung total harga
+            const totalPrice = price * quantity;
+    
+            // Buat order baru
+            const newOrder = await Order.create({
+                userId,
+                orderType,
+                tableId,
+                totalPrice,
+                quantity
+            }, { transaction: t });
+    
+            // Buat history baru
             const newHistory = await History.create({
-                name, description, price, image, productId
-            })
-            
-        if(!newHistory){
-            throw {name: 'error not found'}
-        }else {
-            res.status(201).json(newHistory);
-        }
-        
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-    static async history(req, res, next){
-        try {
-            let data = await History.findAll();
-            if (!data) {
-                throw {name : 'Data not found'};
+                name,
+                description,
+                price,
+                image,
+                productId,
+                tableId,
+                orderType,
+                userId
+            }, { transaction: t });
+    
+            await t.commit(); // Commit transaksi jika semua sukses
+    
+            res.status(201).json({
+                message: 'Order dan History berhasil dibuat.',
+                order: newOrder,
+                history: newHistory
+            });
+    
+        } catch (error) {
+            await t.rollback(); // Rollback transaksi jika terjadi error
+            console.error(error);
+            if (error.name === 'TableRequired' || error.name === 'TableNotAvailable' || error.name === 'InsufficientStock' || error.name === 'ProductNotFound') {
+                res.status(400).json({ error: error.message });
             } else {
-                res.status(200).json(data);
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        }
+    }
+    
+    static async productCustomer(req, res, next) {
+        try {
+            let { search, sort, filter, page } = req.query;
+    
+            let option = { 
+                order : [ 
+                    ['id', 'ASC']
+                ],
+            };
+    
+            // kondisi search
+            if (search) {
+                option.where = {
+                    name: { 
+                        [Op.iLike]: `%${search}%` 
+                    },
+                };
+            }
+    
+            // kondisi filter berdasarkan categoryId
+            if (filter){
+                option.where = {
+                    categoryId : {
+                        [Op.eq]: `${filter}`
+                    }
+                }
+            }
+    
+            // kondisi sorting
+            if (sort) {
+                if (sort === 'ASC') {
+                    option.order = [
+                    ['updatedAt', 'ASC']
+                    ]
+                }
+                if (sort === 'DESC') {
+                    option.order = [
+                    ['updatedAt', 'DESC']
+                    ]
+                }
+                    
+            }
+            
+                const limit = 10;
+                const offset = (page - 1) * limit || 0;
+    
+                option.limit = limit;
+                option.offset = offset;
+    
+            let data = await Product.findAll(option);
+    
+            if (!data) {
+                throw {name : 'error not found'}
+            } else {
+                res.status(200).json(data)
             }
         } catch (error) {
-            console.log(error);    
+            next(error)
+        }
+    }
+    
+    static async history(req, res, next){
+        try {
+            const data = await History.findAll({
+                where: {
+                    userId: req.user.id
+                },
+                order: [['createdAt', 'DESC']],
+                attributes: {
+                    exclude: ['updatedAt']
+                }
+            })
+
+            if (data.length === 0) {
+                return res.status(404).json({message: "Tidak ada history"})
+            } 
+
+            return res.status(200).json({
+                message: 'Berhasil Mengambil Data History',
+                total: data.length,
+                data: data
+            })
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -49,15 +184,29 @@ class controllerHistory{
 
     static async deleteHistory(req, res, next){
         try {
-            const id = req.params.id;
-            let deleted = await History.destroy({
-                where : {
+            const id = req.params.historyId;
+            const data = await History.findOne({
+                where: {
+                    userId: req.user.id,
                     id
                 }
             })
 
+            if (!data) {
+                return res.status(403).json({  
+                    message: "History not found or Unauthorized"
+                });
+            }
+
+            let deleted = await History.destroy({
+                where : {
+                    id,
+                    userId: req.user.id
+                }
+            })
+
             if (deleted !== 0) {
-                req.json({
+                res.json({
                     message : `History Pemesanan with ${id} deleted successfully`
                 })
             } else {
@@ -69,4 +218,4 @@ class controllerHistory{
     }
 }
 
-module.exports = controllerHistory
+module.exports = ControllerHistoryCustomer

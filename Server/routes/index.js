@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router()
 const routerPub = require("./publik");
+const routerCus = require("./customer");
+
 const controllerProduct = require("../controllers/controllerProduct");
 const controllerUser = require("../controllers/controllerUser");
-const controllerHistory = require("../controllers/controllerHistory");
+const controllerHistory = require("../controllers/controllerHistoryPublik");
 const authentication = require("../middleware/authentication");
 
 router.use(routerPub)
@@ -12,6 +14,7 @@ router.post("/register", controllerUser.register);
 router.post("/login", controllerUser.login);
 
 router.use(authentication);
+router.use(routerCus)
     
 router.post("/product", controllerProduct.createProduct);
 router.delete("/product/:id", controllerProduct.deleteProduct);

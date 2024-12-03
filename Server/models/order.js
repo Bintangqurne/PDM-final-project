@@ -20,12 +20,16 @@ module.exports = (sequelize, DataTypes) => {
     orderType: DataTypes.STRING,
     tableId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notNull: 'Table Id tidak boleh kosong',
-        notEmpty: 'Table Id tidak boleh kosong'
-      }
     },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+      validate: {
+          min: 1,
+          notNull: { msg: 'Quantity tidak boleh kosong' },
+      }
+  }
   }, {
     sequelize,
     modelName: 'Order',
