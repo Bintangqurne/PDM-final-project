@@ -21,7 +21,7 @@ module.exports = {
       role: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: "Admin"
+        defaultValue: "Customer"
       },
       createdAt: {
         allowNull: false,

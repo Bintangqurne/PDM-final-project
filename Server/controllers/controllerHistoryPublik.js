@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const {Product, History, Order, Table} = require("../models")
 
 class controllerHistoryPublik{
@@ -49,18 +50,88 @@ class controllerHistoryPublik{
     }
     
 
-    static async history(req, res, next){
+    static async history(req, res, next) {
         try {
-            let data = await History.findAll();
-            if (!data) {
-                throw {name : 'Data not found'};
-            } else {
-                res.status(200).json(data);
+          let { search, sort, filter, page } = req.query;
+      
+          let option = {
+            order: [['id', 'ASC']], // Default order berdasarkan id
+          };
+      
+          // Kondisi untuk pencarian berdasarkan 'name'
+          if (search) {
+            option.where = {
+              name: { 
+                [Op.iLike]: `%${search}%` 
+              },
+            };
+          }
+      
+          // Kondisi untuk filter berdasarkan 'categoryId'
+          if (filter) {
+            // Jika sudah ada where sebelumnya, kita gabungkan dengan filter
+            option.where = option.where || {};
+            option.where.categoryId = {
+              [Op.eq]: filter
+            };
+          }
+      
+          // Kondisi untuk sorting berdasarkan 'updatedAt'
+          if (sort) {
+            if (sort === 'ASC') {
+              option.order = [
+                ['updatedAt', 'ASC']
+              ];
+            } else if (sort === 'DESC') {
+              option.order = [
+                ['updatedAt', 'DESC']
+              ];
             }
+          }
+      
+          // Handling pagination: limit dan offset
+          const limit = 10; 
+          const offset = (page - 1) * limit || 0; 
+      
+          option.limit = limit;
+          option.offset = offset;
+      
+          // Ambil data history dari database
+          const data = await History.findAll({
+            where: {
+              ...option.where, 
+            },
+            order: option.order, 
+            attributes: {
+              exclude: ['updatedAt'], 
+            },
+          });
+      
+          if (data.length === 0) {
+            return res.status(404).json({ message: "Tidak ada history" });
+          }
+      
+          // Menghitung total data yang sesuai dengan kondisi query
+          const total = await History.count({
+            where: {
+              userId: req.user.id,
+              ...option.where,
+            },
+          });
+      
+          return res.status(200).json({
+            message: 'Berhasil Mengambil Data History',
+            total, 
+            data, 
+            totalPages: Math.ceil(total / limit), 
+            currentPage: page || 1, 
+          });
+      
         } catch (error) {
-            console.log(error);    
+          console.log(error);
+          return res.status(500).json({ message: "Terjadi kesalahan di server" });
         }
-    }
+      }
 
     static async historyById(req, res, next){
         try {

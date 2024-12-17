@@ -7,8 +7,8 @@ class ControllerHistoryCustomer{
         try {
             const { productId } = req.params;
             const userId = req.user?.id || null;
-            let { name, description, price, image, tableId, orderType, quantity } = req.body;
-    
+            let { name, description, price, image, tableId, orderType, quantity } = req.body; // Hilangkan orderId dari body request
+        
             // Validasi orderType dan tableId
             if (orderType === 'dine in' && (!tableId || isNaN(tableId))) {
                 throw { name: 'TableRequired', message: 'TableId wajib diisi untuk dine in.' };
@@ -16,7 +16,7 @@ class ControllerHistoryCustomer{
             if (orderType === 'pick up') {
                 tableId = null; // Set tableId ke null untuk pick up
             }
-    
+        
             // Cek apakah meja tersedia hanya untuk dine in
             if (orderType === 'dine in') {
                 const table = await Table.findByPk(tableId, { transaction: t });
@@ -24,7 +24,7 @@ class ControllerHistoryCustomer{
                     throw { name: 'TableNotAvailable', message: 'Meja tidak tersedia untuk dipesan.' };
                 }
             }
-    
+        
             // Cek produk dan stok
             const product = await Product.findByPk(productId, { transaction: t });
             if (!product) {
@@ -33,24 +33,24 @@ class ControllerHistoryCustomer{
             if (product.amount <= 0 || quantity > product.amount) {
                 throw { name: 'InsufficientStock', message: 'Jumlah produk tidak mencukupi.' };
             }
-    
+        
             // Kurangi stok produk
             product.amount -= quantity;
             await product.save({ transaction: t });
-    
+        
             // Hitung total harga
             const totalPrice = price * quantity;
-    
+        
             // Buat order baru
             const newOrder = await Order.create({
                 userId,
                 orderType,
                 tableId,
                 totalPrice,
-                quantity
+                quantity,
             }, { transaction: t });
-    
-            // Buat history baru
+        
+            // Buat history baru dengan menggunakan orderId dari newOrder
             const newHistory = await History.create({
                 name,
                 description,
@@ -59,17 +59,18 @@ class ControllerHistoryCustomer{
                 productId,
                 tableId,
                 orderType,
-                userId
+                userId,
+                orderId: newOrder.id // Gunakan ID order yang baru dibuat
             }, { transaction: t });
-    
+        
             await t.commit(); // Commit transaksi jika semua sukses
-    
+        
             res.status(201).json({
                 message: 'Order dan History berhasil dibuat.',
                 order: newOrder,
                 history: newHistory
             });
-    
+        
         } catch (error) {
             await t.rollback(); // Rollback transaksi jika terjadi error
             console.error(error);
@@ -80,6 +81,7 @@ class ControllerHistoryCustomer{
             }
         }
     }
+    
     
     static async productCustomer(req, res, next) {
         try {
@@ -142,36 +144,105 @@ class ControllerHistoryCustomer{
         }
     }
     
-    static async history(req, res, next){
+    static async history(req, res, next) {
         try {
-            const data = await History.findAll({
-                where: {
-                    userId: req.user.id
-                },
-                order: [['createdAt', 'DESC']],
-                attributes: {
-                    exclude: ['updatedAt']
-                }
-            })
-
-            if (data.length === 0) {
-                return res.status(404).json({message: "Tidak ada history"})
-            } 
-
-            return res.status(200).json({
-                message: 'Berhasil Mengambil Data History',
-                total: data.length,
-                data: data
-            })
+          let { search, sort, filter, page } = req.query;
+      
+          let option = {
+            order: [['id', 'ASC']], // Default order berdasarkan id
+          };
+      
+          // Kondisi untuk pencarian berdasarkan 'name'
+          if (search) {
+            option.where = {
+              name: { 
+                [Op.iLike]: `%${search}%` 
+              },
+            };
+          }
+      
+          // Kondisi untuk filter berdasarkan 'categoryId'
+          if (filter) {
+            // Jika sudah ada where sebelumnya, kita gabungkan dengan filter
+            option.where = option.where || {};
+            option.where.categoryId = {
+              [Op.eq]: filter
+            };
+          }
+      
+          // Kondisi untuk sorting berdasarkan 'updatedAt'
+          if (sort) {
+            if (sort === 'ASC') {
+              option.order = [
+                ['updatedAt', 'ASC']
+              ];
+            } else if (sort === 'DESC') {
+              option.order = [
+                ['updatedAt', 'DESC']
+              ];
+            }
+          }
+      
+          // Handling pagination: limit dan offset
+          const limit = 10; 
+          const offset = (page - 1) * limit || 0; 
+      
+          option.limit = limit;
+          option.offset = offset;
+      
+          // Ambil data history dari database
+          const data = await History.findAll({
+            where: {
+              userId: req.user.id, 
+              ...option.where, 
+            },
+            order: option.order, 
+            include: [{
+                model: Order,
+                attributes: ['totalPrice', 'quantity']
+            }]
+          });
+      
+          if (data.length === 0) {
+            return res.status(404).json({ message: "Tidak ada history" });
+          }
+      
+          // Menghitung total data yang sesuai dengan kondisi query
+          const total = await History.count({
+            where: {
+              userId: req.user.id,
+              ...option.where,
+            },
+            
+          });
+      
+          return res.status(200).json({
+            message: 'Berhasil Mengambil Data History',
+            total, 
+            data, 
+            totalPages: Math.ceil(total / limit), 
+            currentPage: page || 1, 
+          });
+      
         } catch (error) {
-            console.log(error);
+          console.log(error);
+          return res.status(500).json({ message: "Terjadi kesalahan di server" });
         }
-    }
+      }
+      
 
     static async historyById(req, res, next){
         try {
             const {id} = req.params;
-            let data = await History.findByPk(id);
+            let data = await History.findByPk(id, {
+                where: {
+                    userId: req.user.id
+                },
+                include: [{
+                    model: Order,
+                    attributes: ['totalPrice', 'quantity']
+                }]
+            });
             if (!data) {
                 throw {name : 'Data not found'};
             } else {

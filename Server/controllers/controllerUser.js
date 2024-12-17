@@ -1,6 +1,8 @@
 const { comparePassword } = require("../helpers/bcrypt");
 const { createToken } = require("../helpers/jwt");
 const {User} = require("../models")
+const {OAuth2Client} = require('google-auth-library');
+
 
 class controllerUser{
     static async register(req, res, next) {
@@ -63,6 +65,52 @@ class controllerUser{
           
         }
       }
+
+static async googleLogin(req, res, next) {
+  const token = req.headers['google-token'];
+  const client = new OAuth2Client();
+
+  try {
+    // Verifikasi token Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,  // CLIENT_ID aplikasi yang mengakses backend
+    });
+
+    // Ambil payload dari token
+    const payload = ticket.getPayload();
+    console.log(payload, 'ini payload');
+    const email = payload['email']; // Mengambil email dari payload
+    const image = payload['picture']; // Mengambil gambar profil dari payload
+
+    // Cek apakah pengguna sudah ada di database
+    let user = await User.findOne({
+      where: { email },
+    });
+
+    // Jika pengguna tidak ditemukan, buat pengguna baru
+    if (!user) {
+      user = await User.create({
+        username: payload.name,
+        email,
+        password: 'Pdm-password-' + Date.now(), // Password placeholder, bisa diubah
+        image,
+      }, {
+        hooks: false, // Nonaktifkan hooks jika tidak diperlukan
+      });
+    }
+
+    // Setelah menemukan atau membuat pengguna, buat token akses
+    const access_token = createToken({ id: user.id });
+
+    // Kirimkan token akses sebagai respons
+    res.status(200).json({ access_token });
+  } catch (error) {
+    console.log(error);
+    next(error); // Panggil next untuk error handling middleware
+  }
+}
+
     
 }
 

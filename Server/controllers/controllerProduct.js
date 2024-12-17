@@ -148,7 +148,8 @@ class controllerProduct{
                 res.status(200).json(data)
             }
         } catch (error) {
-            next(error)
+            console.log(error);
+            
         }
     }
 }

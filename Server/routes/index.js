@@ -12,11 +12,14 @@ router.use(routerPub)
 
 router.post("/register", controllerUser.register);
 router.post("/login", controllerUser.login);
+router.post("/google-login", controllerUser.googleLogin)
 
 router.use(authentication);
 router.use(routerCus)
     
 router.post("/product", controllerProduct.createProduct);
+router.get("/product", controllerProduct.product);
+router.get("/product/:id", controllerProduct.productById);
 router.delete("/product/:id", controllerProduct.deleteProduct);
 router.patch("/product/:id", controllerProduct.updateProduct);
 router.get("/history", controllerHistory.history);

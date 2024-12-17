@@ -51,6 +51,16 @@ module.exports = {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       },
+      orderId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Orders',
+          key: 'id'
+        },
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -58,7 +68,8 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      }
+      },
+      
     });
   },
   async down(queryInterface, Sequelize) {

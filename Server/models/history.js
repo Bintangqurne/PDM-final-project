@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       History.belongsTo(models.Product, {foreignKey: 'productId'})
       History.belongsTo(models.User, {foreignKey: 'userId'})
       History.belongsTo(models.Table, {foreignKey: 'tableId'})
+      History.belongsTo(models.Order, {foreignKey: 'orderId'})
     }
   }
   History.init({
@@ -64,11 +65,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     tableId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notNull: {msg: "Table Id tidak boleh kosong"},
-        notEmpty: {msg: "Table Id tidak boleh kosong"},
-      }
+    },
+    orderId: {
+      type: DataTypes.INTEGER,
     }
   }, {
     sequelize,
